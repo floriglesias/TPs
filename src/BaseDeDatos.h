@@ -10,6 +10,9 @@
 #include "linear_map.h"
 #include "linear_set.h"
 #include "utils.h"
+#include "string_map.h"
+#include <map>
+
 
 using namespace std;
 
@@ -162,6 +165,34 @@ public:
    */
   linear_set<Criterio> top_criterios() const;
 
+  //PASAR A LOGICA CUANDO COMPILE
+  /**
+   * Precondicion: 
+   * -el parametro campo debe ser un campo de la tabla que tiene como nombre al parametro nombre
+   * -la tabla a la que hace referencia el parametro nombre debe ser una tabla de la base
+   *
+   * Postcondicion:
+   * para todo valor del campo, aparecen asociados los registros de la tabla que contengan ese valor 
+   */
+  void crearIndice(const string &nombre, const string &campo);
+
+  //PASAR A LOGICA CUANDO COMPILE
+  /**
+   * Precondicion: 
+   * -los dos tablas pasadas como parametro deben ser tablas que pertenecen a la base
+   * -el campo pasado como parametro debe ser comun a ambas tablas
+   * -al menos una de la tablas debe tener un indice para el campo pasado como parametro
+   * -(quizas no sea necesario) las tablas solo deben tener el campo pasado como parametro en comun (y ningun otro) 
+   *
+   * Postcondicion:
+   * -el iterador devuelto apunta al primero de los registros formados al fusionar las tablas
+   * dicho registro tendra como campos a la union de los campos de ambas tablas y como dato al dato
+   * que se encontraba en ese campo antes de producirse el join
+   * -el iterador debe poder "crear" los siguientes registros que correspondan segun el join
+   * cuando se realice la operacion "avanzar iterador"
+   */
+  join_iterator join(const string &tabla1, const string &tabla2, const string &campo) const;
+
 private:
 	  ///////////////////////////////////////////////////////////////////////////////////////////////////
     /** \name Representación
@@ -175,14 +206,22 @@ private:
      *     * ) \LAND
      *     * obtener(c, _uso_criterios) > 0
      *
-     * abs: registro \TO Registro\n
-     * abs(r) \EQUIV r' \|
-     *  * campos(r') = _campos \LAND
-     *  * \FORALL (c : string) c \in _campos \IMPLIES valor(c, r') = valor(c,
-     *    _datos) 
+     * abs: basededatos \TO BaseDeDatos\n
+     * abs(bd) \EQUIV bd' \|
+     *  * _nombres_tablas = tablas(bd') \LAND
+     *  * (\FORALL nt : string) nt \IN _nombres_tablas \IMPLIES
+     *    * obtener(nt, _tablas) = dameTabla(nt, bd') \LAND
+     *  * (\FORALL c : criterio) 
+     *    * (usoCriterio(c, bd') == 0 \LAND \LNOT def?(c, _uso_criterios)) \LOR
+     *    * (usoCriterio(c, db') == obtener(c, _uso_criterios))
      */
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // los indices estan representados como un diccionario de diccionarios de conjunto de iteradores a registros,
+    // donde el primer diccionario se indexa por el nombre de la tabla,
+    // y el segundo por el nombre del campo en dicha tabla.
+    string_map < string_map < string_map < linear_set < Tabla::const_iterador_registros > > > > _indicesString; // nombretabla -> campo -> dato -> it
+    string_map < string_map < map < int, linear_set < Tabla::const_iterador_registros > > > > _indicesInt;
     /** @{ */
     linear_set<string> _nombres_tablas;
     linear_map<string, Tabla> _tablas;

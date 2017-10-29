@@ -1,4 +1,5 @@
 #include "BaseDeDatos.h"
+#include "const_iterador_registros.h" // New
 #include <list>
 #include <tuple>
 #include <algorithm>
@@ -9,8 +10,8 @@ void BaseDeDatos::crearTabla(const string &nombre,
                              const linear_set<string> &claves,
                              const vector<string> &campos,
                              const vector<Dato> &tipos) {
-  _nombres_tablas.insert(nombre);
-  _tablas.insert(make_pair(nombre, Tabla(claves, campos, tipos)));
+  _nombres_tablas.fast_insert(nombre);
+  _tablas.fast_insert(make_pair(nombre, Tabla(claves, campos, tipos)));
 }
 
 void BaseDeDatos::agregarRegistro(const Registro &r, const string &nombre) {
@@ -109,7 +110,7 @@ Tabla BaseDeDatos::busqueda(const BaseDeDatos::Criterio &c,
   if (_uso_criterios.count(c)) {
     _uso_criterios.at(c)++;
   } else {
-    _uso_criterios.insert(make_pair(c, 1));
+    _uso_criterios.fast_insert(make_pair(c, 1));
   }
 
   const Tabla &ref = dameTabla(nombre);
@@ -135,8 +136,121 @@ linear_set<BaseDeDatos::Criterio> BaseDeDatos::top_criterios() const {
         ret = linear_set<Criterio>();
         max = crit_count.second;
       }
-      ret.insert(crit_count.first);
+      ret.fast_insert(crit_count.first);
     }
   }
   return ret;
 }
+
+void BaseDeDatos::crearIndice(const string &nombre, const string &campo) { // Consultar
+    Tabla t = dameTabla(nombre);
+    if (t.tipoCampo(campo).esNat()) {
+        auto it = t.registros_begin();
+        while (it != t.registros_end()) {
+            if (((_indicesInt.find(nombre).second).find(campo).second).count((*it).dato(campo)) == 1) {
+                ((_indicesInt.find(nombre).second).find(campo).second).fast_insert((*it).dato(campo));
+            } else {
+                linear_set<Tabla::const_iterador_registros> l;
+                l.fast_insert(*it);
+                pair<Dato, linear_set<Tabla::const_iterador_registros> p = make_pair(campo, *it);
+                dicc.insert(p);
+            }
+        }
+    } else {
+        auto it = t.registros_begin();
+        while (it != t.registros_end()) {
+            if (((_indicesString.find(nombre).second).find(campo).second).count((*it).dato(campo)) == 1) {
+                ((_indicesString.find(nombre).second).find(campo).second).fast_insert((*it).dato(campo));
+            } else {
+                linear_set<Tabla::const_iterador_registros> l;
+                l.fast_insert(it);
+                pair<Dato, linear_set<Tabla::const_iterador_registros> p = make_pair(campo, *it);
+                dicc.insert(p);
+            }
+        }
+    }
+/*
+    string_map < linear_set < Tabla::const_iterador_registros > > s = string_map();
+    auto it = t.registros_begin();
+    while (it != t.registros_end()) {
+        pair<Dato, Registro *> p = make_pair((*it).dato(c), *it->()); // convertir dato en string
+        s.insert(p);
+        ++it;
+    }
+*/
+}
+
+join_iterator join(const string &tabla1, const string &tabla2, const string &campo) const {
+  //FALTA UN IF QUE DIVIDA ENTRE DATOS TIPO NAT Y TIPO STRING
+  //COMPLETAR CUANDO SE ACTUALICE LA ESTRUCTURA
+
+
+  //Encuentro cual de las tablas tiene indice para el campo en cuestion
+
+  //Dado que no existen indices incompletos, puedo estar seguro de que si para el campo en cuestion
+  //existe al menos un dato que esté indexado, entonces efectivamente la tabla tiene un indice para dicho campo
+
+
+  if((indices.find(tabla1).second).find(campo).second.size() > 0) {
+    
+    //Busco el primer dato del campo en comun de la otra tabla (la que podria no tener indice), me fijo si coincide con el primer dato
+    //de la tabla con indice y en caso de que esto suceda creo el correspondiente registro producto de la fusion de las dos tablas
+   
+    //Lo que esta a la izquierda es (teoricamente) el dato del campo en comun del primer registro de la tabla2
+    //Lo que esta a la derecha es el primer valor del indice
+    if( (*(tabla2.registros().begin())).dato(campo) == 
+    (*((((indices.find(tabla1).second).find(campo).second).find(dato(campo)).first ) {
+      
+      //Si coinciden, creo el registro fusionado
+      Registro regFusionado = *(tabla2.registros().begin());
+      for(iterator it = tabla1.campos().begin(); it != tabla1.campos().end(); ++it) {
+      regFusionado.campos().fast_insert(*it);
+      //Falta agregar los datos de la tabla1...(como se hace?)
+
+      }
+      //Esta declaracion seguramente esta mal, pero la idea es que el join_iterator apunte al registro que se acaba de crear
+      //Consultar sintaxis
+      join_iterator registroUnion = regFusionado;
+
+      return registroUnion;
+
+    }
+
+    else 
+      //Seguir con el siguiente dato
+
+
+
+  //Como la precondicion establece que al menos una tabla tiene indice para dicho campo, entonces podemos estar seguros
+  //de que la otra tabla es la que esta indexada
+  else 
+     //Igual que el caso anterior pero con las tablas invertidas
+     if( (*(tabla1.registros().begin())).dato(campo) == 
+    (*((((indices.find(tabla2).second).find(campo).second).find(dato(campo)).first ) {
+      
+      //Si coinciden, creo el registro fusionado
+      Registro regFusionado = *(tabla1.registros().begin());
+      for(iterator it = tabla2.campos().begin(); it != tabla2.campos().end(); ++it) {
+      regFusionado.campos().fast_insert(*it);
+      //Falta agregar los datos de la tabla2...
+
+      }
+
+      join_iterator registroUnion = regFusionado;
+
+      return registroUnion;
+
+    }
+
+    else 
+      //Seguir con el siguiente dato
+
+}
+
+
+
+
+
+
+
+
