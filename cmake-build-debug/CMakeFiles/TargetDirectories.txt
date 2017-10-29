@@ -1,0 +1,16 @@
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/install/strip.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/install.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/list_install_components.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/correrTests_sol.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/install/local.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/CMakeFiles/correrTests.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/install/local.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/list_install_components.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/rebuild_cache.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/edit_cache.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/install/strip.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/install.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/gtest_main.dir
+/Users/Flor/Desktop/aed2-2c2017-tp2/cmake-build-debug/tests/google-test/CMakeFiles/gtest.dir
