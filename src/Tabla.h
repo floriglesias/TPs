@@ -2,8 +2,7 @@
 #define TABLA_H
 
 #include <string>
-#include <set>
-#include "string_map.h"
+
 #include "linear_map.h"
 #include "linear_set.h"
 #include "Dato.h"
@@ -57,12 +56,11 @@ public:
    * @param r Registro a agregar
    *
    * \pre t = \P{this} \LAND campos(r) = campos(t) \LAND puedoInsertar?(r, t)
-   * \post \P{this} = agregarRegistro(r, t) \LAND \P{res} apunta al registro
-   * recién agregado.
+   * \post \P{this} = agregarRegistro(r, t)
    *
    * \complexity{\O(copy(registro))}
    */
-  const_iterador_registros agregarRegistro(const Registro &r);
+  void agregarRegistro(const Registro &r);
 
   /**
    * @brief Campos de la tabla
@@ -164,13 +162,6 @@ private:
     linear_set<string> _campos;
     linear_map<string, Dato> _tipos;
     linear_set<Registro> _registros;
-
-
-    //TODO (Flor) : Los índices sólo tienen sentido dentro de la base de datos; esto quiere decir que no se deben agregar en esta clase, sin en la base de datos.
-    //TODO (Flor) : De cualquer manera, si los agregaran a esta clase, deberían modificar el rep, el abs y la impleentación de algunas operaciones como el constructor y el ==
-    //TODO (Flor) : Otro tema a tener en cuenta para los índices, es que si guardan en el indice los registros, no les va a dar las complejidades.
-    string_map<Registro> indiceStr;
-    set<Registro> indiceNat;
     /** }@ */
 
 };

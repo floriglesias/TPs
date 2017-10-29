@@ -4,8 +4,7 @@
 
 using namespace std;
 
-Registro::Registro(const vector<string>& campos, const vector<Dato>& datos) :
-//TODO (Flor) : tiene que modificar esta implementación, pues _campos no existe más y _datos no tiene definida la operación fast_insert
+Registro::Registro(const vector<string>& campos, const vector<Dato>& datos) : 
     _campos(campos.begin(), campos.end()) {
         for (int i = 0; i < campos.size(); i++) {
             _datos.fast_insert(make_pair(campos[i], datos[i]));
@@ -18,7 +17,6 @@ const Dato& Registro::dato(const string& campo) const {
 }
 
 const linear_set<string>& Registro::campos() const {
-    //TODO (Flor) : tiene que modificar esta implementación pues _campos no existe más
     return _campos;
 }
 
@@ -38,7 +36,6 @@ bool operator==(const Registro& r1, const Registro& r2) {
 }
 
 ostream &operator<<(ostream &os, const Registro &r) {
-    //TODO (Flor) : el string_map no tiene el operador <<. Por lo cual, no pueden implementar está operación de esta manera.
   os << r._datos;
   return os;
 }

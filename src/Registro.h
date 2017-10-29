@@ -6,7 +6,6 @@
 #include "Dato.h"
 #include "linear_set.h"
 #include "linear_map.h"
-#include "string_map.h"
 
 using namespace std;
 
@@ -18,6 +17,9 @@ using namespace std;
  *
  * **se explica con** TAD Diccionario(string, Dato)
  */
+
+//TODO (Flor) : Falta  hacer los cambios necesarios para cumplir con las complejidades pedidas en el enunciado. Esto también implica que puede haber cambios en en rep, abs y documentación de la clase
+
 class Registro {
 
 public:
@@ -28,7 +30,7 @@ public:
      * \pre long(campos) = long(datos)
      * \post \P{res} = nuevoRegistro(campos, datos)
      *
-     * \complexity{\O(long(campos) * (copy(campo) + copy(dato)))}
+     * \complexity{\O(long(campos) * copy(campo) * copy(dato))}
      */
     Registro(const vector<string>& campos, const vector<Dato>& datos);
 
@@ -42,7 +44,7 @@ public:
      * 
      * \complexity{\O(long(campos(\P{this})) * cmp(campo))}
      */
-    const Dato& dato(const string& campo) const; //TODO (Flor) : la complejidad de esta operación se modificó, entonces deben arreglar la documentación
+    const Dato& dato(const string& campo) const;
 
     /**
      * @brief Devuelve los campos definidos en un registro
@@ -58,24 +60,22 @@ public:
 
 private:
 	  ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //TODO (Flor) : El abs no es correcto en esta implementación.
     /** \name Representación
      * rep: registro \TO bool\n
      * rep(d) \EQUIV 
      *  * _campos = claves(_datos)
      *
-     *
      * abs: registro \TO Registro\n
      * abs(r) \EQUIV r' \|
-     *  * campos(r') = _campos \LAND //TODO (Flor) : _campos no existe en esta implementación, por lo cual el abs dejo de ser correcto
+     *  * campos(r') = _campos \LAND
      *  * \FORALL (c : string) c \in _campos \IMPLIES valor(c, r') = valor(c,
      *    _datos) 
      */
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /** @{ */
-    string_map<string, Dato> _datos; //TODO (Flor) :string_map solo recive un tipo de datos y no dos
+    linear_set<string> _campos;
+    linear_map<string, Dato> _datos;
     /** @} */
 
     friend ostream &operator<<(ostream &, const Registro &);

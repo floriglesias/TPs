@@ -94,8 +94,7 @@ class linear_set {
    * @brief Cantidad de apariciones del valor.
    *
    * \pre true
-   * \post (x \IN \P{this} \LAND \P{res} = 1) \LOR (x \NOT \IN \P{this} \LAND
-   * \P{res} = 0)
+   * \post \P{res} == x \IN \P{this}
    *
    * \complexity{\O(n) * cmp(T)}
    */
@@ -126,7 +125,7 @@ class linear_set {
    * elementos elminados.
    *
    * \pre c == \P{this} \LAND x \IN \P{this}
-   * \post \P{this} == c - {x} \LAND \P{res} = 1 
+   * \post \P{this} == c - {x}
    *
    * \complexity{\O(#claves(\P{this}))}
    */
@@ -138,8 +137,7 @@ class linear_set {
    *
    * \pre true
    * \post 
-   *       * x \IN \P{this} \IMPLIES \P{res} apunta a la aparición de x en el
-   *       conjunto
+   *       * x \IN \P{this} \IMPLIES \P{res} = k
    *       * \NEG x \IN \P{this} \IMPLIES \P{res} es end
    *
    * \complexity{\O(#claves(\P{this}))}
@@ -150,7 +148,7 @@ class linear_set {
    * @brief Operador asignación del conjunto 
    *
    * \pre true
-   * \post \P{this} == other y \P{res} refiere a \P{this}
+   * \post \P{this} == other
    *
    * \complexity{\O(#claves(\P{this}) + #(other) * copy(T))}
    */

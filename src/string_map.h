@@ -1,29 +1,26 @@
 #ifndef STRING_MAP_STRING_MAP_H
 #define STRING_MAP_STRING_MAP_H
 
-#include "linear_set.h"
 #include <cassert>
 #include <string>
 #include <vector>
-
+#include "linear_map.h"
 
 using std::string;
 using std::vector;
 using std::pair;
 
+// TODO (Flor): Falta completar la documentación de la clase. Por ejemplo falta la descripción de la clase, se explica con TAD ???, rep, abs...
+// TODO (Flor): Falta terminar la documentación de cada operación. Por ejemplo falta pre y post, mejorar las descripciones y en algunos casos falta la complejidad
+// TODO (Flor): Documentar  también funciones auxliares. Por ejemplo, los constructores y destructor de Nodo
+
 /**
  * Implementacion de map<string,T> sobre Trie
  * Asume de T:
- * - tiene constructor por copia (con complejidad copy(T))
- * - tiene operador == (con complejidad cmp(T))
+ * - tiene constructor por copia 
+ * - tiene operador ==
  * - solo permite utilizar el operator[] si T tiene constructor por defecto
- *
- *
  */
-//TODO (Flor) : La estructura está bien
-// TODO (Flor): Falta completar la documentación de la clase. Por ejemplo falta la descripción de la clase, se explica con TAD ???, rep, abs...
-// TODO (Flor): Falta terminar la documentación de cada operación. Por ejemplo falta pre y post, mejorar las descripciones y en algunos casos falta la complejidad
-
 template < typename T >
 class string_map {
 public:
@@ -51,19 +48,19 @@ public:
 
     /** @brief Constructor por copia
      *
-     * \complexity{\O(sn * S * copy(T))}
+     * \complexity{\O(sn * S)}
      */
     string_map(const string_map &);
 
     /** @brief Operador de asignacion
      *
-     * \complexity{\O(sn * S * copy(T))}
+     * \complexity{\O(sn * S)}
      */
     string_map& operator=(const string_map &);
 
     /** @brief Operadores de comparacion
      *
-     * \complexity{\O(sn * S * cmp(T))}
+     * \complexity{\O(sn * S)}
      */
     bool operator==(const string_map& otro) const;
     bool operator!=(const string_map& otro) const {return !(*this == otro);}
@@ -135,7 +132,6 @@ public:
      *  @returns un iterador al par <clave, significado>
      *
      *  \complexity{\O(S)}
-     *
      */
    iterator find(const key_type &key);
 
@@ -154,9 +150,9 @@ public:
      * modificado y un bool que indica si la clave se insertó como una clave
      * nueva.
      * 
-     * \complexity{\O(S + copy(T))}
+     * \complexity{\O(S + copy(value_type))}
      */
-    pair<iterator, bool> insert(const value_type &value);
+    pair<iterator,bool> insert(const value_type &value);
 
     /** @brief eliminar una clave
      *  @param key clave a eliminar
@@ -174,22 +170,173 @@ public:
      */
     iterator erase(iterator pos);
 
-
 private:
-    struct Nodo{
-        T* val;
-        Nodo* chars[256];
+    //linear_set<string> _claves;
+     struct Nodo
+     {
+         
+        linear_map<char,Nodo*>* _sig; //Falta incluir linear_map.h. ¿Porqué es un puntero a lineal_map y no un lineal_map?
+        T* _significado;
 
-        Nodo(){
-            val = NULL;
-            for (int i = 0; i < 256; ++i){
-                chars[i] = NULL;
+
+        Nodo() : _sig(nullptr), _significado(nullptr) {}
+
+        ~Nodo(){
+            if(_sig != nullptr){
+                delete *_sig; //a lo que apunta sig?????
             }
-        };
-    };
-    Nodo* raiz_;
-    linear_set<string> claves;
+            if(_significado != nullptr){
+                delete *_significado;// a lo que apunta significado??????????
+            }
+
+        }
+
+        Nodo(const Nodo & nodo){
+            _sig = nullptr;
+            _significado = nullptr;
+            if(nodo._sig != nullptr){
+                linear_map<char,Nodo*> valor(&nodo._sig); //TODO (Flor) : no es correcto el tipo de dato pasado como parametro al contructor por copia de linear_map
+                _sig = *valor;
+            }
+            if(nodo._significado != nullptr){
+                T valor(nodo._significado);
+                _significado = *valor; //TODO (Flor) : No es correcta esta asignación
+            }            
+        }
+     };
+     Nodo* _comienzo; 
+     size_t _size;
+
 };
+
+//implementacion
+template<typename T>
+string_map<T>::string_map(){
+    _comienzo = nullptr;
+}
+
+template<typename T>
+string_map<T>::~string_map(){
+    //Todo (Flor) : ¿Y el resto de los nodos no se borran? Estas perdiendo memoria
+    delete &_comienzo;
+}
+
+// * copy(t)
+template<typename T>
+string_map<T>::string_map(const string_map & otro){
+    if(!otro.empty()){
+        Nodo n = new Nodo(*(otro._comienzo));
+        _comienzo = *n;    
+    }else{
+        _comienzo = nullptr;
+    }
+    
+
+}
+
+template<typename T>
+string_map& string_map<T>::operator=(const string_map & otro){
+    return string_map(otro);
+
+}
+
+template<typename T>
+bool string_map<T>::operator==(const string_map& otro) const{
+
+}
+
+
+
+template<typename T>
+size_type string_map<T>::count(const key_type &key) const{
+    
+    if(_comienzo.empty()) return 0;
+    linear_map<char,Nodo*>* n = _comienzo->_sig;
+    for (int i = 0; i < key.size(); ++i)
+    {
+        linear_map<char,Nodo*>::iterator it = n->find(key[i]);
+        if(it == n->end()){
+            return 0;
+
+        }
+        if(i == key.size()-1){
+            if(it->second->_significado == nullptr){
+                return 0;
+            }else{
+                return 1;
+            }
+        }
+        n = it->second->_sig;
+    }
+}
+
+
+template<typename T>
+size_t string_map<T>::size() const{
+    return _size;
+}
+
+
+template<typename T>
+bool string_map<T>::empty() const{
+    return size() == 0;
+}
+
+template<typename T>
+mapped_type& string_map<T>::operator[](const key_type &key){
+    if(count(key) == 1){
+        return at(key);
+    }else{
+        pair<string_map<T>::iterator,bool> aux = insert(pair<key_type,T>(key,T()));
+        return aux.first->value;
+    }   
+
+}
+
+
+template<typename T>
+mapped_type& string_map<T>::at(const key_type& key){
+    linear_map<char,Nodo*>* n = _comienzo->_sig;
+    for (int i = 0; i < key.size(); ++i)
+    {
+        linear_map<char,Nodo*>::iterator it = n->find(key[i]);        
+        if(i == key.size()-1){            
+            return *(it->second->_significado);
+            
+        }
+        n = it->second->_sig;
+    }   
+}
+
+
+template<typename T>
+mapped_type& string_map<T>::at(const key_type& key) const{
+    linear_map<char,Nodo*>* n = _comienzo->_sig;
+    for (int i = 0; i < key.size(); ++i)
+    {
+        linear_map<char,Nodo*>::const_iterator it = n->find(key[i]);        
+        if(i == key.size()-1){            
+            return *(it->second->_significado);
+            
+        }
+        n = it->second->_sig;
+    }
+}
+
+
+template<typename T>
+void string_map<T>::clear(){
+    if(empty()) return;
+    linear_map<char,Nodo*>::iterator it = begin();
+    while(!empty()){
+        it = erase(it);
+    }
+}
+
+
+
+
+
 
 
 #endif //STRING_MAP_STRING_MAP_H
