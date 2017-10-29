@@ -3,6 +3,9 @@
 #include <tuple>
 #include <algorithm>
 
+
+//TODO (Flor) : Faltan hacer todas las modificaciones necesarias para cumplir las complejidades pedidas.
+
 BaseDeDatos::BaseDeDatos(){};
 
 void BaseDeDatos::crearTabla(const string &nombre, 

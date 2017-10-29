@@ -11,6 +11,8 @@
 #include "linear_set.h"
 #include "utils.h"
 
+//TODO (Flor) : Faltan hacer todas las modificaciones necesarias para cumplir las complejidades pedidas
+
 using namespace std;
 
 /**

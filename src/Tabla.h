@@ -2,7 +2,8 @@
 #define TABLA_H
 
 #include <string>
-
+#include <set>
+#include "string_map.h"
 #include "linear_map.h"
 #include "linear_set.h"
 #include "Dato.h"
@@ -144,7 +145,8 @@ private:
      *    * \FORALL (c : campo) c \IN _campos \IMPLIES 
      *        Nat?(valor(c, r)) = Nat?(obtener(c, _tipos))
      *    * no se repiten claves \EQUIV 
-     *      \LNOT hayCoincidencia(r, _claves, _registros - {r})
+     *      \FORALL (r' : registro) r \IN (_registros - {r}) \IMPLIES 
+     *      \LNOT hayCoincidencia(r, _claves, _registros)
      *  * ) 
      *
      * abs: tabla \TO Tabla\n
@@ -162,6 +164,13 @@ private:
     linear_set<string> _campos;
     linear_map<string, Dato> _tipos;
     linear_set<Registro> _registros;
+
+
+    //TODO (Flor) : Los índices sólo tienen sentido dentro de la base de datos; esto quiere decir que no se deben agregar en esta clase, sin en la base de datos.
+    //TODO (Flor) : De cualquer manera, si los agregaran a esta clase, deberían modificar el rep, el abs y la impleentación de algunas operaciones como el constructor y el ==
+    //TODO (Flor) : Otro tema a tener en cuenta para los índices, es que si guardan en el indice los registros, no les va a dar las complejidades.
+    string_map<Registro> indiceStr;
+    set<Registro> indiceNat;
     /** }@ */
 
 };

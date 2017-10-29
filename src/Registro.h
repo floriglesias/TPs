@@ -6,6 +6,7 @@
 #include "Dato.h"
 #include "linear_set.h"
 #include "linear_map.h"
+#include "string_map.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ public:
      * 
      * \complexity{\O(long(campos(\P{this})) * cmp(campo))}
      */
-    const Dato& dato(const string& campo) const;
+    const Dato& dato(const string& campo) const; //TODO (Flor) : la complejidad de esta operación se modificó, entonces deben arreglar la documentación
 
     /**
      * @brief Devuelve los campos definidos en un registro
@@ -57,22 +58,24 @@ public:
 
 private:
 	  ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //TODO (Flor) : El abs no es correcto en esta implementación.
     /** \name Representación
      * rep: registro \TO bool\n
      * rep(d) \EQUIV 
      *  * _campos = claves(_datos)
      *
+     *
      * abs: registro \TO Registro\n
      * abs(r) \EQUIV r' \|
-     *  * campos(r') = _campos \LAND
+     *  * campos(r') = _campos \LAND //TODO (Flor) : _campos no existe en esta implementación, por lo cual el abs dejo de ser correcto
      *  * \FORALL (c : string) c \in _campos \IMPLIES valor(c, r') = valor(c,
      *    _datos) 
      */
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /** @{ */
-    linear_set<string> _campos;
-    linear_map<string, Dato> _datos;
+    string_map<string, Dato> _datos; //TODO (Flor) :string_map solo recive un tipo de datos y no dos
     /** @} */
 
     friend ostream &operator<<(ostream &, const Registro &);

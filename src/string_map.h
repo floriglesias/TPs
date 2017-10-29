@@ -1,9 +1,11 @@
 #ifndef STRING_MAP_STRING_MAP_H
 #define STRING_MAP_STRING_MAP_H
 
+#include "linear_set.h"
 #include <cassert>
 #include <string>
 #include <vector>
+
 
 using std::string;
 using std::vector;
@@ -15,7 +17,13 @@ using std::pair;
  * - tiene constructor por copia (con complejidad copy(T))
  * - tiene operador == (con complejidad cmp(T))
  * - solo permite utilizar el operator[] si T tiene constructor por defecto
+ *
+ *
  */
+//TODO (Flor) : La estructura está bien
+// TODO (Flor): Falta completar la documentación de la clase. Por ejemplo falta la descripción de la clase, se explica con TAD ???, rep, abs...
+// TODO (Flor): Falta terminar la documentación de cada operación. Por ejemplo falta pre y post, mejorar las descripciones y en algunos casos falta la complejidad
+
 template < typename T >
 class string_map {
 public:
@@ -78,10 +86,7 @@ public:
      *  @param key clave a acceder, si no existe, se crea
      *  @returns una referencia a la definicion.
      *
-     *  \complexity{
-     *    * \O(S) si la clave esta definida 
-     *    * \O(S) + copy(T) sino
-     *  }
+     *  \complexity{\O(S)}
      */
     mapped_type &operator[](const key_type &key);
 
@@ -130,6 +135,7 @@ public:
      *  @returns un iterador al par <clave, significado>
      *
      *  \complexity{\O(S)}
+     *
      */
    iterator find(const key_type &key);
 
@@ -168,8 +174,21 @@ public:
      */
     iterator erase(iterator pos);
 
-private:
 
+private:
+    struct Nodo{
+        T* val;
+        Nodo* chars[256];
+
+        Nodo(){
+            val = NULL;
+            for (int i = 0; i < 256; ++i){
+                chars[i] = NULL;
+            }
+        };
+    };
+    Nodo* raiz_;
+    linear_set<string> claves;
 };
 
 
