@@ -1,219 +1,376 @@
-#ifndef TP2_STRING_MAP_ITERATORS_H
-#define TP2_STRING_MAP_ITERATORS_H
+#ifndef string_map_iterators_h
+#define string_map_iterators_h
 
 #include "string_map.h"
-#include <cassert>
-#include <string>
-#include <vector>
 
-using std::string;
-using std::vector;
-using std::pair;
-
-
-template<class T>
-class string_map<T>::const_iterator {
+template <typename T >
+class string_map<T>::output_iterator {
 public:
-    using value_type = string_map::value_type;
-    using iterator_category = std::forward_iterator_tag;
+    using value_type = const string_map<T>::value_type;
+    using iterator_category = std::output_iterator_tag;
     using reference = value_type &;
     using pointer = value_type *;
     using difference_type = std::ptrdiff_t;
 
 
+    output_iterator(string_map<T> *tree){
+        this->tree = tree;
+    }
     /**
-     * @brief Constructor por copia del iterador.
-     *
-     * \complexity{\O(?)}
+     * It must be copy-constructible
      */
-    const_iterator(const typename string_map<T>::const_iterator&);
-
+    output_iterator(const output_iterator & other){
+        this->tree = other.tree;
+    }
     /**
-     * @brief Conversión desde iterator
-     *
-     * \complexity{\O(?)}
+     * It must be move-constructible (Lvalues are swappable. Since C++ 11)
      */
-    const_iterator(const typename string_map<T>::iterator&);
-
+    output_iterator(const output_iterator && other){
+        this->tree = other.tree;
+    }
     /**
-     * @brief Avanza el iterador una posición.
-     *
-     * \pre El iterador no debe estar en la posición pasando-el-último.
-     * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición
-     * siguiente.
-     *
-     * \complexity{\O(?)}
+     * It must be copy-assignable
      */
-    string_map::const_iterator &operator++() {
-        // El iterador esta parado en un nodo cuyo significado no es nullptr
-        // Primero tengo que chequear que el array del nodo actual esta vacio (caso de palabras clave: pelo y pelota)
-        // sino tengo que seguir hacia abajo por esa rama del trie
-
-        int i;
-        for (i=0; i < 256 && _node->_children[i] == nullptr; i++);
-        if (i<256) {
-            // Tengo que seguir hacia abajo
-            _clave += char(i);
-            _node = child[i];
-            // Tengo que chequear si tiene significado, si es asi me quedo ahi y sino sigo para abajo y sigue igual
-        } else {
-            // El array children esta completo de nullptr asi que tengo que subir
-            _node = _node->_padre;
-            const char lastChar = _clave.at(_clave.size()-1);
-            i = lastChar;
-            child = *(_node->_children);
-            for (++i; i < 256 && child[i] == nullptr; i++);
-
-
-
-        }
-
+    output_iterator operator=(const output_iterator &other){
+        this->tree = other.tree;
     };
-
     /**
-     * @brief Desreferencia el puntero
-     *
-     * El valor devuelto tiene aliasing dentro de la colección.
-     *
-     * \pre El iterador no debe estar en la posición pasando-el-último.
-     * \post El valor resultado es una referencia al valor apuntado.
-     *
-     * \complexity{\O(?)}
+     * It must be move-assignable (Lvalues are swappable. Since C++ 11)
      */
-    const value_type &operator*() const {
-        T significado = *(_node->_significado);
-        const string clave = _clave;
-        value_type res=std::make_pair(clave,significado);
-        return res;
-    };    //en lugar de const value_type & podría usar (chequear) const reference
-
+    output_iterator operator=(const output_iterator &&other){
+        this->tree = other.tree;
+    };
     /**
-     * @brief Operador flechita
-     *
-     * El valor devuelvo tiene aliasing dentro de la colección.
-     *
-     * \pre El iterador no debe estar en la posición pasando-el-último.
-     * \post El valor resultado es un puntero al valor apuntado.
-     *
-     * \complexity{\O(?)}
+     * HYPER PROXY
      */
-    const value_type* operator->() const;   //en lugar de const value_type * podría usar (chequear) const pointer
-
+    output_iterator& operator=(const value_type &value){
+        this->tree->insert(value);
+        return *this;
+    };
     /**
-     * @brief Comparación entre iteradores
-     *
-     * \pre ambos iteradores refieren a la misma colección
-     * \post true sii los iteradores apuntan al mismo elemento
-     *
-     * \complexity{\O(?)}
+     * Can be incremented.
      */
-    bool operator==(const string_map<T>::iterator &other) const;
-
+    output_iterator &operator++(){
+        /**
+         * No me interesa que devuelve, ya que el concepto de incrementar en mi diccionario no tiene mayor importancia,
+         * ya que arranque con el contenedor vacio, por lo tanto el "siguiente" no existe.
+         */
+        return *this;
+    }
     /**
-     * @brief Comparación entre iteradores
-     *
-     * \pre ambos iteradores refieren a la misma colección
-     * \post true sii los iteradores no apuntan al mismo elemento
-     *
-     * \complexity{\O(?)}
+     * Can be incremented.
      */
-    bool operator!=(const string_map<T>::iterator &other) const;
-
-
-
-private:
-    friend class string_map;
-
-    const_iterator(const typename string_map<T>::const_iterator&);
-
-    Node* _node;
-    string _clave;
-
-    //typename string_map<T>::const_iterator it;
-};
-
-template<class T>
-class string_map<T>::iterator {
-public:
-    using value_type = const string_map::value_type;
-    using iterator_category = std::forward_iterator_tag;
-    using reference = value_type &;
-    using pointer = value_type *;
-    using difference_type = std::ptrdiff_t;
-
+    output_iterator &operator++(int){
+        /**
+         * No me interesa que devuelve, ya que el concepto de incrementar en mi diccionario no tiene mayor importancia,
+         * ya que arranque con el contenedor vacio, por lo tanto el "siguiente" no existe.
+         */
+        return *this;
+    }
     /**
-     * @brief Constructor por copia del iterador.
-     *
-     * \complexity{\O(?)}
+     * Can be dereferenced as an lvalue (if in a dereferenceable state). It shall only be dereferenced as the left-side
+     * of an assignment statement. Once dereferenced, its iterator value may no longer be dereferenceable
      */
-    iterator(const typename string_map<T>::iterator&);
-
-    /**
-     * @brief Avanza el iterador una posición.
-     *
-     * \pre El iterador no debe estar en la posición pasando-el-último.
-     * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición
-     * siguiente.
-     *
-     * \complexity{\O(?)}
-     */
-    string_map::iterator &operator++();
-
-    /**
-     * @brief Desreferencia el puntero
-     *
-     * El valor devuelto tiene aliasing dentro de la colección.
-     *
-     * \pre El iterador no debe estar en la posición pasando-el-último.
-     * \post El valor resultado es una referencia al valor apuntado.
-     *
-     * \complexity{\O(?)}
-     */
-    const value_type &operator*() const;
-
-    /**
-     * @brief Operador flechita
-     *
-     * El valor devuelvo tiene aliasing dentro de la colección.
-     *
-     * \pre El iterador no debe estar en la posición pasando-el-último.
-     * \post El valor resultado es un puntero al valor apuntado.
-     *
-     * \complexity{\O(?)}
-     */
-    const value_type* operator->() const;
-
-    /**
-     * @brief Comparación entre iteradores
-     *
-     * \pre ambos iteradores refieren a la misma colección
-     * \post true sii los iteradores apuntan al mismo elemento
-     *
-     * \complexity{\O(?)}
-     */
-    bool operator==(const string_map<T>::iterator &other) const;
-
-    /**
-     * @brief Comparación entre iteradores
-     *
-     * \pre ambos iteradores refieren a la misma colección
-     * \post true sii los iteradores no apuntan al mismo elemento
-     *
-     * \complexity{\O(?)}
-     */
-    bool operator!=(const string_map<T>::iterator &other) const;
-
+    output_iterator& operator*(){
+        return *this;
+    }
 private:
     friend class string_map<T>;
-
-    /**
-     * @brief Constructor del iterador a partir de un iterador interno.
-     */
-    iterator(const typename string_map<T>::iterator&);
-
-    typename string_map<T>::iterator it;
-
-
+    friend class string_map<T>::iterator;
+    string_map<T> *tree;
 };
 
-#endif //TP2_STRING_MAP_ITERATORS_H
+template <typename T >
+class string_map<T>::iterator {
+
+public:
+    using value_type = const string_map<T>::value_type;
+    using iterator_category = std::input_iterator_tag;
+    using reference = value_type &;
+    using pointer = value_type *;
+    using difference_type = std::ptrdiff_t;
+    /**
+     * @brief Constructor del iterador.
+     *
+     * \pre ninguna
+     * \post ninguna
+     *
+     * \complexity{\O(S)}
+     */
+    iterator(Node * root){
+        //region O = O(1) + max(O(1), O(S))
+        if(root != nullptr){
+            //region O = O(1) + max(O(1), O(S)) = O(S)
+            if(root->element != nullptr){
+                this->actual = root;
+            } else {
+                this->actual = Node::nextChild(root);
+            }
+            //endregion
+        } else {
+            this->actual = nullptr;
+        }
+        //endregion
+    };
+    /**
+     * @brief Constructor por copia del iterador.
+     *
+     * \pre ninguna
+     * \post pisa los datos existentes por el parametro pasado
+     *
+     * \complexity{\O(1)}
+     */
+    iterator(const iterator &other){
+        this->actual = other.actual;
+    };
+    /**
+     * @brief Asignacion de un iterador a otro
+     *
+     * \pre ninguna
+     * \post genera una nueva instancia
+     *
+     * \complexity{\O(1)}
+     */
+    iterator& operator=(const iterator &other){
+        this->actual = other.actual;
+    };
+    /**
+     * @brief Destructor del iterador
+     *
+     * \pre el objeto debe estar vivo
+     * \post el objeto es destruido
+     *
+     * \complexity{\O(1)}
+     */
+    ~iterator() {
+        this->actual = nullptr;
+    };
+    /**
+     * @brief Indica si dos iteradores son iguales
+     *
+     * \pre Los iteradores estan en la misma coleccion
+     * \post True sii los iteradores apuntan al mismo elemento
+     *
+     * \complexity{\O(1)}
+     */
+    bool operator==(const iterator &other) const {
+        return this->actual == other.actual;
+    };
+    /**
+     * @brief Indica si dos iteradores son distintos
+     *
+     * \pre Los iteradores estan en la misma coleccion
+     * \post True sii los iteradores no apuntan al mismo elemento
+     *
+     * \complexity{\O(1)}
+     */
+    bool operator!=(const iterator &other) const {
+        //region O = O(1) + O(1) + O(1) = O(1)
+        return !(*this == other);
+        //endregion
+    };
+    /**
+     * @brief Indica si dos iteradores son distintos
+     *
+     * \pre El iterador no esta en la posición pasando-el-último
+     * \post El valor resultado es una referencia al valor apuntado.
+     *
+     * \complexity{\O(1)}
+     */
+    value_type& operator*(){
+        if(this->actual->pair->second != *this->actual->element){
+            this->actual->pair->second = *this->actual->element;
+        }
+        return *this->actual->pair;
+    };
+     /**
+     * @brief Operador flechita
+     *
+     * El valor devuelvo tiene aliasing dentro de la colección.
+     *
+     * \pre El iterador no debe estar en la posición pasando-el-último.
+     * \post El valor resultado es un puntero al valor apuntado.
+     *
+     * \complexity{\O(1)}
+     */
+    value_type* operator->(){
+        if(this->actual->pair->second != *this->actual->element){
+            this->actual->pair->second = *this->actual->element;
+        }
+        return this->actual->pair;
+    };
+    /**
+     * @brief Operador siguiente
+     * Avanza el iterador una posicion
+     *
+     * \pre El iterador no debe estar en la posición pasando-el-último.
+     * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición siguiente.
+     *
+     * \complexity{\O(1)}
+     */
+    iterator operator++(){
+        this->actual = Node::sucesor(this->actual);
+        return iterator(this->actual);
+    };
+    /**
+     * @brief Operador siguiente
+     * Avanza el iterador la cantidad de posiciones indicada por el parámetro
+     *
+     * \pre El iterador no debe estar en una posición tal que la posicion actual + i no pase el último.
+     * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición actual + i.
+     *
+     * \complexity{\O(1)}
+     */
+    iterator operator++(int i) {
+        this->actual = Node::sucesor(this->actual);
+        return iterator(this->actual);
+    };
+private:
+    friend class string_map<T>::const_iterator;
+    friend class string_map<T>;
+    Node * actual;
+};
+
+template < class T >
+class string_map<T>::const_iterator {
+
+public:
+    using value_type = const string_map<T>::value_type;
+    using iterator_category = std::input_iterator_tag;
+    using reference = value_type &;
+    using pointer = value_type *;
+    using difference_type = std::ptrdiff_t;
+    /**
+     * constructor
+     */
+    const_iterator(Node * root){
+        if(root != nullptr){
+            if(root->element != nullptr){
+                this->actual = root;
+            } else {
+                this->actual = Node::nextChild(root);
+            }
+            if(this->actual != nullptr){
+                if(this->actual->pair->second != *this->actual->element){
+                    this->actual->pair->second = *this->actual->element;
+                }
+            }
+        } else {
+            this->actual = nullptr;
+        }
+    };
+    /**
+     * copy-constructible
+     */
+    const_iterator(const iterator &other){
+        this->actual = other.actual;
+    };
+    /**
+     * copy-constructible
+     */
+    const_iterator(const const_iterator &other){
+        this->actual = other.actual;
+    };
+    /**
+     * copy-assignable
+     */
+    const_iterator& operator=(const const_iterator &other){
+        this->actual = other.actual;
+    };
+    /**
+     * destructible
+     */
+    ~const_iterator() {
+        this->actual = nullptr;
+    };
+    /**
+     * @brief Indica si dos iteradores son iguales
+     *
+     * \pre Los iteradores estan en la misma coleccion
+     * \post True sii los iteradores apuntan al mismo elemento
+     *
+     * \complexity{\O(1)}
+     */
+    bool operator==(const typename string_map<T>::const_iterator &other) const {
+        return this->actual == other.actual;
+    };
+    /**
+     * @brief Indica si dos iteradores son diferentes
+     *
+     * \pre Los iteradores estan en la misma coleccion
+     * \post True sii los iteradores no apuntan al mismo elemento
+     *
+     * \complexity{\O(1)}
+     */
+    bool operator!=(const typename string_map<T>::const_iterator &other) const {
+        return !(*this == other);
+    };
+    /**
+     * @brief Indica si dos iteradores son distintos
+     *
+     * \pre El iterador no esta en la posición pasando-el-último
+     * \pos El valor resultado es una referencia al valor apuntado.
+     *
+     * \complexity{\O(1)}
+     */
+    const value_type& operator*() const {
+        return *this->actual->pair;
+    };
+    /**
+    * @brief Operador flechita
+    *
+    * El valor devuelto tiene aliasing dentro de la colección.
+    *
+    * \pre El iterador no debe estar en la posición pasando-el-último.
+    * \post El valor resultado es un puntero al valor apuntado.
+    *
+    * \complexity{\O(1)}
+    */
+    const value_type* operator->() const {
+        return this->actual->pair;
+    };
+    /**
+     * @brief Operador siguiente
+     * Avanza el iterador una posicion
+     *
+     * \pre El iterador no debe estar en la posición pasando-el-último.
+     * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición siguiente.
+     *
+     * \complexity{\O(1)}
+     */
+    const_iterator operator++(){
+        this->actual = Node::sucesor(this->actual);
+        if(this->actual == nullptr){
+            return const_iterator(this->actual);
+        }
+        if(this->actual->pair->second != *this->actual->element){
+            this->actual->pair->second = *this->actual->element;
+        }
+        return const_iterator(this->actual);
+    };
+    /**
+     * @brief Operador siguiente
+     * Avanza el iterador la cantidad de posiciones indicada por el parámetro
+     *
+     * \pre El iterador no debe estar en una posición tal que la posición actual + i no pase el último.
+     * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición actual + i.
+     *
+     * \complexity{\O(1)}
+     */
+    const_iterator operator++(int i) {
+        this->actual = Node::sucesor(this->actual);
+        if(this->actual == nullptr){
+            return const_iterator(this->actual);
+        }
+        if(this->actual->pair->second != *this->actual->element){
+            this->actual->pair->second = *this->actual->element;
+        }
+        return const_iterator(this->actual);
+    };
+private:
+    friend class string_map<T>;
+    Node * actual;
+};
+
+
+#endif //string_map_iterators_h

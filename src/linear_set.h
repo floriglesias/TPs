@@ -21,11 +21,89 @@ template<typename T>
 class linear_set {
  public:
   using value_type = T;
-  using size_type = size_t; 
-  // Forward declarations
-  class iterator;
-  class const_iterator; 
+  using size_type = size_t;
 
+  class iterator {
+  public:
+      using value_type = const linear_set::value_type;
+      using iterator_category = std::forward_iterator_tag;
+      using reference = value_type &;
+      using pointer = value_type *;
+      using difference_type = std::ptrdiff_t;
+
+      /**
+       * @brief Constructor por copia del iterador.
+       *
+       * \complexity{\O(1)}
+       */
+      iterator(const typename linear_set<T>::iterator &other);
+
+      /**
+       * @brief Avanza el iterador una posición.
+       *
+       * \pre El iterador no debe estar en la posición pasando-el-último.
+       * \post \P{res} es una referencia a \P{this}. \P{this} apunta a la posición
+       * siguiente.
+       *
+       * \complexity{\O(1)}
+       */
+      iterator &operator++();
+
+      /**
+       * @brief Desreferencia el puntero
+       *
+       * El valor devuelto tiene aliasing dentro de la colección.
+       *
+       * \pre El iterador no debe estar en la posición pasando-el-último.
+       * \post El valor resultado es una referencia al valor apuntado.
+       *
+       * \complexity{\O(1)}
+       */
+      const value_type &operator*() const;
+
+      /**
+       * @brief Operador flechita
+       *
+       * El valor devuelvo tiene aliasing dentro de la colección.
+       *
+       * \pre El iterador no debe estar en la posición pasando-el-último.
+       * \post El valor resultado es un puntero al valor apuntado.
+       *
+       * \complexity{\O(1)}
+       */
+      const value_type *operator->() const;
+
+      /**
+       * @brief Comparación entre iteradores
+       *
+       * \pre ambos iteradores refieren a la misma colección
+       * \post true sii los iteradores apuntan al mismo elemento
+       *
+       * \complexity{\O(1)}
+       */
+      bool operator==(const linear_set<T>::iterator &other) const;
+
+      /**
+       * @brief Comparación entre iteradores
+       *
+       * \pre ambos iteradores refieren a la misma colección
+       * \post true sii los iteradores no apuntan al mismo elemento
+       *
+       * \complexity{\O(1)}
+       */
+      bool operator!=(const linear_set<T>::iterator &other) const;
+
+  private:
+      friend class linear_set<T>;
+
+      /**
+       * @brief Constructor del iterador a partir de un iterador interno.
+       */
+      iterator(const typename linear_map<T, bool>::iterator &other);
+
+      typename linear_map<T, bool>::iterator it;
+  };
+  class const_iterator;
   /**
    * @brief Crea un conjunto vacio.
    *
@@ -162,8 +240,12 @@ class linear_set {
    * \complexity{\O(#(\P{this}) * #(other))}
    */
   bool operator==(const linear_set<T> &other) const;
+  bool operator!=(const linear_set<T> &other) const{
+    return ((*this)==other);
+  };
 
-  /**
+
+    /**
    * @brief Devuelve un iterador al inicio del conjunto.
    *
    * \pre true
@@ -209,7 +291,7 @@ class linear_set {
    *
    * rep: linear_set(T) \TO bool\n
    * rep(c) \EQUIV
-   *  * \FORALL (t : T) 
+   *  * \FORALL (t : T)
    *    (def?(t, _elems) \IMPLIES obtener(t, _elems))
    *
    * abs: linear_set(T) \TO Conj(T)\n

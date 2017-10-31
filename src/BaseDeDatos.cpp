@@ -1,8 +1,8 @@
 #include "BaseDeDatos.h"
-#include "const_iterador_registros.h" // New
 #include <list>
 #include <tuple>
 #include <algorithm>
+
 
 BaseDeDatos::BaseDeDatos(){};
 
@@ -11,12 +11,61 @@ void BaseDeDatos::crearTabla(const string &nombre,
                              const vector<string> &campos,
                              const vector<Dato> &tipos) {
   _nombres_tablas.fast_insert(nombre);
-  _tablas.fast_insert(make_pair(nombre, Tabla(claves, campos, tipos)));
+  _tablas.fast_insert(std::pair<string, Tabla>(nombre, Tabla(claves, campos, tipos)));
 }
 
+bool BaseDeDatos::tieneIndice(const string &nombre, const string &campo){
+    //region O(1) * O(1) = O(1)
+    return (_indices.count(nombre) == 1) and (_indices.at(nombre).count(campo)==1);
+    //endregion
+}
+
+//DONE Complejidad pedida: O(m*[L + logm])
+void BaseDeDatos::crearIndice(const string &nombre, const string &campo){
+    //region O(m)*(O(L)*(O(L)+O(copyConjReg))) + O(copyIndice) + O(string_map<Indice>) = ... //TODO!!!
+  //region O(1)
+  if(tieneIndice(nombre,campo)) return;
+  const Tabla &t1  = _tablas.at(nombre);
+  Indice ind(campo);
+  //endregion
+  //region O(m)*O(actualizarIndice) = O(m)*(O(L)*(O(L)+O(copyConjReg))) //TODO mejorar
+  if(t1.registros().size() != 0){    //O(1)
+    for(Registro r : t1.registros()){
+      ind.actualizarIndice(r);
+    }
+  }
+  //endregion
+  //region O(copyIndice) + O(copy string_map<Indice>)    //TODO ¡mejorar con urgencia!
+  if(_indices.count(nombre)==0){
+      //region O(1) + O(std::pair<string, Indice>) + O(std::pair<string, string_map<Indice> >)
+    string_map<Indice> s;
+    s.fast_insert(std::pair<string, Indice>(campo,ind));
+    _indices.fast_insert(std::pair<string, string_map<Indice> >(nombre, s));
+      //endregion
+  } else {
+      //region O(1) + O(1) + O(std::pair<string, Indice >)
+    _indices[nombre].fast_insert(std::pair<string, Indice >(campo,ind));
+      //endregion
+  }
+  //endregion
+    //endregion
+}
+
+//Piden que sea O(copyReg + C* [L + log(m)])
 void BaseDeDatos::agregarRegistro(const Registro &r, const string &nombre) {
+//region O(copyReg + C*[L(L+copyConjReg)]
+    //region O(1) + O(copyReg)
   Tabla &t = _tablas.at(nombre);
   t.agregarRegistro(r);
+    //endregion
+    //region O(C)*(O(1)+O(actualizarIndice)) = O(C*[L(L +copyConjReg)])
+  for(auto campo : t.campos()){
+    if(tieneIndice(nombre, campo)){
+      _indices[nombre][campo].actualizarIndice(r);
+    }
+  }
+    //endregion
+//endregion
 }
 
 const linear_set<string> &BaseDeDatos::tablas() const { return _nombres_tablas; }
@@ -33,6 +82,7 @@ int BaseDeDatos::uso_criterio(const BaseDeDatos::Criterio &criterio) const {
   }
 }
 
+//TODO: revisar cuentas de complejidad para este metodo...
 bool BaseDeDatos::registroValido(const Registro &r,
                                  const string &nombre) const {
   const Tabla &t = _tablas.at(nombre);
@@ -90,14 +140,19 @@ pair<vector<string>, vector<Dato> > BaseDeDatos::_tipos_tabla(const Tabla &t) {
   return make_pair(res_campos, res_tipos);
 }
 
+//TODO: en comentarios aclaro la idea de como hacerla O(cr).
 bool BaseDeDatos::criterioValido(const Criterio &c,
                                  const string &nombre) const {
-  const Tabla &t = _tablas.at(nombre);
-  for (auto restriccion : c) {
+  const Tabla &t = _tablas.at(nombre);  //O(1) string_map
+  for (auto restriccion : c) {  //O(cr)*, y lo de adentro tiene que quedar O(1)
+    //TODO: verificar esto:
+      // esta queda O(1) haciendo finds con los strings de campo sobre el trie que corresponda...
     if (not t.campos().count(restriccion.campo())) {
       return false;
     }
-    if (t.tipoCampo(restriccion.campo()).esNat() != 
+    //la complejidad de esta parte viene del acceso dado por tipoCampo.
+    //se vuelve O(1) al cambiar string_map por linear_map
+    if (t.tipoCampo(restriccion.campo()).esNat() !=
         restriccion.dato().esNat()) {
       return false;
     }
@@ -142,115 +197,87 @@ linear_set<BaseDeDatos::Criterio> BaseDeDatos::top_criterios() const {
   return ret;
 }
 
-void BaseDeDatos::crearIndice(const string &nombre, const string &campo) { // Consultar
-    Tabla t = dameTabla(nombre);
-    if (t.tipoCampo(campo).esNat()) {
-        auto it = t.registros_begin();
-        while (it != t.registros_end()) {
-            if (((_indicesInt.find(nombre).second).find(campo).second).count((*it).dato(campo)) == 1) {
-                ((_indicesInt.find(nombre).second).find(campo).second).fast_insert((*it).dato(campo));
-            } else {
-                linear_set<Tabla::const_iterador_registros> l;
-                l.fast_insert(*it);
-                pair<Dato, linear_set<Tabla::const_iterador_registros> p = make_pair(campo, *it);
-                dicc.insert(p);
-            }
-        }
-    } else {
-        auto it = t.registros_begin();
-        while (it != t.registros_end()) {
-            if (((_indicesString.find(nombre).second).find(campo).second).count((*it).dato(campo)) == 1) {
-                ((_indicesString.find(nombre).second).find(campo).second).fast_insert((*it).dato(campo));
-            } else {
-                linear_set<Tabla::const_iterador_registros> l;
-                l.fast_insert(it);
-                pair<Dato, linear_set<Tabla::const_iterador_registros> p = make_pair(campo, *it);
-                dicc.insert(p);
-            }
-        }
-    }
-/*
-    string_map < linear_set < Tabla::const_iterador_registros > > s = string_map();
-    auto it = t.registros_begin();
-    while (it != t.registros_end()) {
-        pair<Dato, Registro *> p = make_pair((*it).dato(c), *it->()); // convertir dato en string
-        s.insert(p);
-        ++it;
-    }
-*/
+
+typename BaseDeDatos::join_iterator BaseDeDatos::join_end() {
+    //region O = O(1)
+    return join_iterator();
+    //endregion
+};
+
+
+typename BaseDeDatos::join_iterator BaseDeDatos::join(const string &tabla1, const string & tabla2, const string &campo){
+  Tabla & _tabla1 = _tablas.at(tabla1);
+  Tabla & _tabla2 = _tablas.at(tabla2);
+  /**
+   * Caso 1, del lado izquierdo no tenemos registros
+   * me voy con el end()
+   */
+  //region O = O(1) + O(1) = O(1)
+  if(_tabla1.registros().size() == 0){
+    //region O = O(1)
+    return join_iterator();
+    //endregion
+  }
+  //endregion
+  /**
+   * Caso 2, del lado derecho no tenemos registros
+   * me voy con el end()
+   */
+  //region O = O(1) + O(1) = O(1)
+  if(_tabla2.registros().size() == 0){
+    //region O = O(1)
+    return join_iterator();
+    //endregion
+  }
+  //endregion
+  /**
+   * Caso 3, al menos uno de los dos tiene que tener indice, asi que se puede utilizar el join
+   */
+  //region O = O(1) + O(m * L) = O(m * L)
+  if(tieneIndice(tabla1, campo)){
+      //region O = O(m * L)
+      return join(_tabla2.registros(), _indices[tabla1][campo], campo);
+      //endregion
+  } else {
+      //region O = O(m * L)
+      return join(_tabla1.registros(), _indices[tabla2][campo], campo);
+      //endregion
+  }
+  //endregion
 }
 
-join_iterator join(const string &tabla1, const string &tabla2, const string &campo) const {
-  //FALTA UN IF QUE DIVIDA ENTRE DATOS TIPO NAT Y TIPO STRING
-  //COMPLETAR CUANDO SE ACTUALICE LA ESTRUCTURA
-
-
-  //Encuentro cual de las tablas tiene indice para el campo en cuestion
-
-  //Dado que no existen indices incompletos, puedo estar seguro de que si para el campo en cuestion
-  //existe al menos un dato que esté indexado, entonces efectivamente la tabla tiene un indice para dicho campo
-
-
-  if((indices.find(tabla1).second).find(campo).second.size() > 0) {
-    
-    //Busco el primer dato del campo en comun de la otra tabla (la que podria no tener indice), me fijo si coincide con el primer dato
-    //de la tabla con indice y en caso de que esto suceda creo el correspondiente registro producto de la fusion de las dos tablas
-   
-    //Lo que esta a la izquierda es (teoricamente) el dato del campo en comun del primer registro de la tabla2
-    //Lo que esta a la derecha es el primer valor del indice
-    if( (*(tabla2.registros().begin())).dato(campo) == 
-    (*((((indices.find(tabla1).second).find(campo).second).find(dato(campo)).first ) {
-      
-      //Si coinciden, creo el registro fusionado
-      Registro regFusionado = *(tabla2.registros().begin());
-      for(iterator it = tabla1.campos().begin(); it != tabla1.campos().end(); ++it) {
-      regFusionado.campos().fast_insert(*it);
-      //Falta agregar los datos de la tabla1...(como se hace?)
-
+typename BaseDeDatos::join_iterator BaseDeDatos::join(const linear_set<Registro> registros, Indice &indice, const string &campo) {
+//region O = O(1) + O(m * L) + O(1) = O(m * L)
+  //region O = O(1)
+  table *inner_join = new std::list< Relationship >();
+  //endregion
+  //region O = m * O(L) = O(m * L)
+  std::for_each(registros.begin(), registros.end(), [&](const Registro& registro){
+      //region O = O(L)
+      linear_set<Registro> &join = indice.registrosAsociados(registro.dato(campo));
+      //endregion
+      //region O = O(1) + O(1) = O(1)
+      if(!join.empty()){
+          //region O = O(1)
+          //region O = O(1) + O(1) + O(1) + O(1) = O(1)
+          Relationship relationship(registro, join.begin(), join.end());
+          //endregion
+          //region O = O(1)
+          inner_join->push_back(relationship);
+          //endregion
+          //endregion
       }
-      //Esta declaracion seguramente esta mal, pero la idea es que el join_iterator apunte al registro que se acaba de crear
-      //Consultar sintaxis
-      join_iterator registroUnion = regFusionado;
-
-      return registroUnion;
-
-    }
-
-    else 
-      //Seguir con el siguiente dato
-
-
-
-  //Como la precondicion establece que al menos una tabla tiene indice para dicho campo, entonces podemos estar seguros
-  //de que la otra tabla es la que esta indexada
-  else 
-     //Igual que el caso anterior pero con las tablas invertidas
-     if( (*(tabla1.registros().begin())).dato(campo) == 
-    (*((((indices.find(tabla2).second).find(campo).second).find(dato(campo)).first ) {
-      
-      //Si coinciden, creo el registro fusionado
-      Registro regFusionado = *(tabla1.registros().begin());
-      for(iterator it = tabla2.campos().begin(); it != tabla2.campos().end(); ++it) {
-      regFusionado.campos().fast_insert(*it);
-      //Falta agregar los datos de la tabla2...
-
-      }
-
-      join_iterator registroUnion = regFusionado;
-
-      return registroUnion;
-
-    }
-
-    else 
-      //Seguir con el siguiente dato
-
+      //endregion
+  });
+  //endregion
+  //region O = O(1)
+  return join_iterator(inner_join);
+  //endregion
+//endregion
 }
 
-
-
-
-
-
-
-
+const BaseDeDatos::Indice &BaseDeDatos::dameIndice(const string &tabla, const string &campo) const {
+    //region O(1)
+  return _indices.at(tabla).at(campo);
+    //endregion O(1)
+}

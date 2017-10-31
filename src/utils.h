@@ -5,10 +5,12 @@
 #include <vector>
 #include <list>
 
+
+
 template<class T>
-bool pertenece(T x, vector<T> v) {
+bool pertenece(T xs, std::vector<T> v) {
     for (int i = 0; i < v.size(); ++i) {
-        if (x == v[i]) {
+        if (xs == v[i]) {
             return true;
         }
     }
@@ -16,7 +18,7 @@ bool pertenece(T x, vector<T> v) {
 }
 
 template<class T>
-bool subset(vector<T> v1, vector<T> v2) {
+bool subset(std::vector<T> v1, std::vector<T> v2) {
     for (int i = 0; i < v1.size(); ++i) {
         if (not pertenece(v1[i], v2)) {
             return false;
@@ -26,12 +28,12 @@ bool subset(vector<T> v1, vector<T> v2) {
 }
 
 template<class T>
-bool seteq(vector<T> v1, vector<T> v2) {
+bool seteq(std::vector<T> v1, std::vector<T> v2) {
     return subset(v1, v2) and subset(v2, v1);
 }
 
 template<class T>
-std::ostream &operator<<(ostream &os, const list<T> &l) {
+std::ostream &operator<<(std::ostream &os, const std::list<T> &l) {
   os << "[";
   for (auto e : l) {
     os << e << ", ";
@@ -41,7 +43,7 @@ std::ostream &operator<<(ostream &os, const list<T> &l) {
 }
 
 template<class A, class B>
-std::ostream &operator<<(ostream &os, const pair<A, B> &p) {
+std::ostream &operator<<(std::ostream &os, const std::pair<A, B> &p) {
   os << "(" << p.first << ", " << p.second << ")";
   return os;
 }

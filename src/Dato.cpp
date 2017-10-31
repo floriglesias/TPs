@@ -4,6 +4,9 @@
 
 using namespace std;
 
+Dato::Dato() :
+        _valorNat(0), _valorStr(""), _esNat(true) {};
+
 Dato::Dato(int valorNat) :
         _valorNat(valorNat), _valorStr(""), _esNat(true) {};
 
@@ -24,6 +27,12 @@ string Dato::valorStr() const {
 
 int Dato::valorNat() const {
     return _valorNat;
+};
+
+string Dato::valor() const{
+    //region O(toString) = O(1) //TODO verificar
+    return esNat()?to_string(_valorNat):_valorStr;
+    //
 };
 
 Dato datoNat(int valorNat) {

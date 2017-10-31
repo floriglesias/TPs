@@ -3,7 +3,7 @@
 
 #include <string>
 #include "Dato.h"
-
+#include <iostream>
 /**
  * @brief Representa una restricción de la base de datos.
  *
@@ -82,6 +82,7 @@ private:
 
 bool operator==(const Restriccion& r1, const Restriccion& r2);
 bool operator<(const Restriccion& r1, const Restriccion& r2);
+ostream &operator<<(ostream &, const Restriccion &r3);
 
 Restriccion Rig(const string& campo, const string& valor);
 Restriccion Rig(const string& campo, const int& valor);

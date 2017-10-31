@@ -6,6 +6,7 @@
 #include "Dato.h"
 #include "linear_set.h"
 #include "linear_map.h"
+#include "string_map.h"
 
 using namespace std;
 
@@ -17,9 +18,6 @@ using namespace std;
  *
  * **se explica con** TAD Diccionario(string, Dato)
  */
-
-//TODO (Flor) : Falta  hacer los cambios necesarios para cumplir con las complejidades pedidas en el enunciado. Esto también implica que puede haber cambios en en rep, abs y documentación de la clase
-
 class Registro {
 
 public:
@@ -33,6 +31,18 @@ public:
      * \complexity{\O(long(campos) * (copy(campo) + copy(dato)))}
      */
     Registro(const vector<string>& campos, const vector<Dato>& datos);
+
+    /**
+     * @brief Genera un nuevo registro fusionando los dos registros pasados por parametro.
+     *
+     * No genera aliasing
+     *
+     * \pre true
+     * \post campos(\P{res}) = campos(r1) U campos(r2) \LAND_L ( (\FORALL c1,c2: string) (c1 \IN campos(r1) \LAND c2 \IN campos(r2)) \IMPLIES_L valor(c1, r1) = valor(c1, \P{res}) \AND valor (c2, r2) = valor(c2, \P{res}) )
+     *
+     * \complexity{\O((#(campos(r1)) + #(campos(r2))) + (S * (copy(campo) + copy(dato))) )}
+     */
+    Registro(const Registro& r1, const Registro& r2);
 
     /**
      * @brief Devuelve el dato asociado a un campo.
@@ -75,7 +85,8 @@ private:
 
     /** @{ */
     linear_set<string> _campos;
-    linear_map<string, Dato> _datos;
+    string_map<Dato> _datos;
+    //string_map<Dato> _datos;
     /** @} */
 
     friend ostream &operator<<(ostream &, const Registro &);

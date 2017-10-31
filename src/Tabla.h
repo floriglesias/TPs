@@ -7,6 +7,8 @@
 #include "linear_set.h"
 #include "Dato.h"
 #include "Registro.h"
+#include "string_map.h"
+
 
 using namespace std;
 
@@ -144,7 +146,8 @@ private:
      *    * \FORALL (c : campo) c \IN _campos \IMPLIES 
      *        Nat?(valor(c, r)) = Nat?(obtener(c, _tipos))
      *    * no se repiten claves \EQUIV 
-     *      \LNOT hayCoincidencia(r, _claves, _registros - {r})
+     *      \FORALL (r' : registro) r \IN (_registros - {r}) \IMPLIES 
+     *      \LNOT hayCoincidencia(r, _claves, _registros)
      *  * ) 
      *
      * abs: tabla \TO Tabla\n
@@ -160,7 +163,7 @@ private:
     /** @{ */
     linear_set<string> _claves;
     linear_set<string> _campos;
-    linear_map<string, Dato> _tipos;
+    string_map<Dato> _tipos;
     linear_set<Registro> _registros;
     /** }@ */
 

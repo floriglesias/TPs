@@ -13,6 +13,17 @@ using namespace std;
 class Dato {
 
 public:
+    Dato();
+    Dato& operator=(const Dato &other){
+        _valorNat = other._valorNat;
+        _valorStr = other._valorStr;
+        _esNat = other._esNat;
+    }
+
+    Dato(const Dato & other){
+        (*this) = other;
+    }
+
 
     /**
      * @brief Constructor de dato con valor nat
@@ -75,6 +86,8 @@ public:
      * \complexity{\O(1)}
      */
     int valorNat() const;
+
+    string valor() const;
 
 private:
 	  ///////////////////////////////////////////////////////////////////////////////////////////////////

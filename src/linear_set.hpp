@@ -22,7 +22,7 @@ template<class T>
 linear_set<T>::linear_set(const linear_set<T> &other) : _elems(other._elems) {}
 
 template<class T>
-pair<typename linear_set<T>::iterator, bool> linear_set<T>::insert(const T &x) {
+pair<typename linear_set<T>::iterator, bool> linear_set<T>::insert(const T &x)  {
   auto ret = _elems.insert(make_pair(x, true));
   return make_pair(iterator(ret.first), ret.second);
 }
@@ -85,12 +85,12 @@ typename linear_set<T>::iterator linear_set<T>::end() {
 
 template<class T>
 typename linear_set<T>::const_iterator linear_set<T>::begin() const {
-  return const_iterator(_elems.begin());
+  return typename linear_set<T>::const_iterator(_elems.begin());
 }
 
 template<class T>
 typename linear_set<T>::const_iterator linear_set<T>::end() const {
-  return const_iterator(_elems.end());
+  return typename linear_set<T>::const_iterator(_elems.end());
 }
 
 template<class T>

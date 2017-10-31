@@ -20,6 +20,11 @@ bool operator<(const Restriccion &r1, const Restriccion &r2) {
           make_tuple(r2.campo(), r2.dato(), r2.igual()));
 }
 
+std::ostream &operator<<(std::ostream & os, const Restriccion &r3){
+    os << " { campo : " << r3.campo() << ", dato : " << r3.dato() << ", excluye : "  << r3.igual() << " } ";
+    return os;
+}
+
 Restriccion Rig(const string &campo, const string &valor) {
   return Restriccion(campo, datoStr(valor), true);
 }
